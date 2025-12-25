@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 from finance_engine.market_data import MarketData
 from finance_engine.portfolio_optimizer import PortfolioOptimizer
@@ -248,6 +248,18 @@ def debug_selenium():
         return jsonify({"status": "success", "message": "Browser launched successfully", "paths": path_info}), 200
     except Exception as e:
         return jsonify({"status": "error", "error": str(e), "paths": path_info if 'path_info' in locals() else "Unknown"}), 500
+
+@app.route('/api/debug-screenshot', methods=['GET'])
+def debug_screenshot():
+    try:
+        if not superhero_connector.driver:
+            return jsonify({"error": "No active driver"}), 404
+        
+        path = "/tmp/screenshot.png"
+        superhero_connector.driver.save_screenshot(path)
+        return send_file(path, mimetype='image/png')
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
