@@ -135,7 +135,16 @@ class SuperheroSecureConnector:
                 self.is_logged_in = True
                 return True, "Login Detected"
             
-            return False, f"Current URL: {current_url}"
+            # Smart Error Detection
+            if "log-in" in current_url:
+                try:
+                    body_text = self.driver.find_element(By.TAG_NAME, "body").text.lower()
+                    if "incorrect" in body_text or "invalid" in body_text or "check your email" in body_text:
+                        return False, "Login Failed: Invalid Credentials"
+                except:
+                    pass
+            
+            return False, f"Current URL: {current_url} (Waiting...)"
         except Exception as e:
             return False, f"Error checking status: {str(e)}"
 

@@ -32,7 +32,7 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
 
     const submitCredentials = async () => {
         setConnectionStatus('connecting');
-        setConnectionMessage('Starting secure secure session...');
+        setConnectionMessage('Starting secure session...');
         try {
             const API_BASE = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://aifinance-backendbackend.onrender.com' : 'http://localhost:5001');
             const res = await fetch(`${API_BASE}/api/connect-superhero`, {
