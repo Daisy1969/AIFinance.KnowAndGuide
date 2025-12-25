@@ -34,7 +34,8 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
         setConnectionStatus('connecting');
         setConnectionMessage('Starting secure secure session...');
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/connect-superhero`, {
+            const API_BASE = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://aifinance-backendbackend.onrender.com' : 'http://localhost:5001');
+            const res = await fetch(`${API_BASE}/api/connect-superhero`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(creds)
@@ -58,7 +59,8 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
 
     const checkLoginStatus = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/superhero-status`);
+            const API_BASE = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://aifinance-backendbackend.onrender.com' : 'http://localhost:5001');
+            const res = await fetch(`${API_BASE}/api/superhero-status`);
             const data = await res.json();
 
             if (data.logged_in) {
@@ -80,7 +82,8 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
 
     const fetchHoldings = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/superhero-holdings`);
+            const API_BASE = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://aifinance-backendbackend.onrender.com' : 'http://localhost:5001');
+            const res = await fetch(`${API_BASE}/api/superhero-holdings`);
             const data = await res.json();
 
             if (res.ok && data.raw_text) {
@@ -102,7 +105,8 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/recommend`, {
+            const API_BASE = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://aifinance-backendbackend.onrender.com' : 'http://localhost:5001');
+            const res = await fetch(`${API_BASE}/api/recommend`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(profile),
@@ -179,7 +183,7 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
                 {/* Status Messages */}
                 {connectionMessage && (
                     <div className={`mt-2 text-xs flex items-center gap-1.5 ${connectionStatus === 'error' ? 'text-red-400' :
-                            connectionStatus === 'connected' ? 'text-green-400' : 'text-blue-400'
+                        connectionStatus === 'connected' ? 'text-green-400' : 'text-blue-400'
                         }`}>
                         {(connectionStatus === 'waiting_for_login' || connectionStatus === 'connecting') && <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
