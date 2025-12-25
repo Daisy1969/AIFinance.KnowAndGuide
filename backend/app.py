@@ -68,6 +68,58 @@ def superhero_holdings():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/recommend', methods=['POST'])
+def recommend():
+    try:
+        data = request.json
+        user_profile = data # Contains age, horizon, currency, etc.
+        
+        # Check if we have connected holdings
+        holdings = []
+        # Check if superhero_connector has an active session and is logged in
+        is_logged_in, _ = superhero_connector.check_login_status()
+        if is_logged_in:
+            portfolio_data = superhero_connector.get_portfolio_holdings()
+            if 'holdings' in portfolio_data:
+                holdings = portfolio_data['holdings']
+        
+        # Mock AI Logic for Buy/Sell (Placeholder for real engine)
+        # In a real app, this would use the 'finance_engine' package
+        strategy = {
+            "allocation": {
+                "Growth (VAS/VGS)": 60,
+                "Defensive (Bonds)": 30,
+                "Speculative": 10
+            },
+            "currency": user_profile.get('currency', 'AUD'),
+            "recommendations": []
+        }
+        
+        # Simple Logic: If holding cash, buy. If holding too much speculative, sell.
+        if holdings:
+            strategy['context'] = "Based on your existing portfolio..."
+            strategy['recommendations'].append({
+                "action": "HOLD",
+                "ticker": "VAS",
+                "reason": "Core holding, keep compounding."
+            })
+            strategy['recommendations'].append({
+                "action": "BUY",
+                "ticker": "IVV",
+                "reason": f"Increase exposure to US markets (in {user_profile.get('currency', 'AUD')})."
+            })
+        else:
+            strategy['context'] = "Starting fresh..."
+            strategy['recommendations'].append({
+                "action": "BUY",
+                "ticker": "VGS",
+                "reason": "Global diversification."
+            })
+
+        return jsonify(strategy)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/recommend-portfolio-optimization', methods=['POST']) # Renamed to avoid conflict
 def recommend_portfolio():
     data = request.json
     if not data:

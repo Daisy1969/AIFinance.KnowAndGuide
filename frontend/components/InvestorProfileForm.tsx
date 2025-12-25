@@ -8,6 +8,7 @@ type UserProfile = {
     horizon: string;
     goal_dividends: boolean;
     assets: string[];
+    currency: 'AUD' | 'USD';
 };
 
 export default function InvestorProfileForm({ onComplete }: { onComplete: (data: any) => void }) {
@@ -15,7 +16,8 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
         age: 30,
         horizon: 'medium',
         goal_dividends: false,
-        assets: ['VAS', 'VGS', 'IVV', 'BHP', 'CSL', 'CBA', 'NDQ']
+        assets: ['VAS', 'VGS', 'IVV', 'BHP', 'CSL', 'CBA', 'NDQ'],
+        currency: 'AUD'
     });
     const [loading, setLoading] = useState(false);
 
@@ -229,6 +231,25 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
                         className="w-5 h-5 text-blue-600 bg-slate-800 border-slate-600 rounded focus:ring-blue-500"
                     />
                     <label className="ml-3 text-sm text-slate-300 font-medium">Prioritize Dividends</label>
+                </div>
+
+                <div className="p-3 bg-slate-900 rounded-lg border border-slate-700">
+                    <label className="block text-xs uppercase tracking-wider text-slate-400 font-semibold mb-2">Primary Currency</label>
+                    <div className="flex bg-slate-800 rounded p-1">
+                        {['AUD', 'USD'].map((curr) => (
+                            <button
+                                key={curr}
+                                type="button"
+                                onClick={() => setProfile({ ...profile, currency: curr as 'AUD' | 'USD' })}
+                                className={`flex-1 py-1.5 text-sm font-medium rounded transition-all ${profile.currency === curr
+                                    ? 'bg-blue-600 text-white shadow-lg'
+                                    : 'text-slate-400 hover:text-white'
+                                    }`}
+                            >
+                                {curr}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <button

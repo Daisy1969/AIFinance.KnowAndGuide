@@ -159,15 +159,43 @@ class SuperheroSecureConnector:
         try:
             # Wait for the portfolio table or list to load
             logger.info("Scraping portfolio...")
-            # For robustness, we will take a screenshot in debug mode if needed
-            # self.driver.save_screenshot("/app/debug_portfolio.png")
             
-            # Simplest extraction: Get page text. Refine later with specific selectors.
-            body_text = self.driver.find_element(By.TAG_NAME, "body").text
+            # Get full page source
+            page_source = self.driver.page_source
+            soup = BeautifulSoup(page_source, 'html.parser')
             
-            # TODO: Add specific parsing for Ticker/Units
+            holdings = []
             
-            return {"raw_text": body_text, "message": "Data extracted"}
+            # Generic table scraping (robust to layout changes)
+            # looking for rows with ticker-like text
+            rows = soup.find_all('tr')
+            for row in rows:
+                cols = row.find_all('td')
+                if len(cols) >= 3:
+                     text_row = [c.get_text(strip=True) for c in cols]
+                     # Heuristic: Check if first col looks like a ticker (3-4 chars, uppercase)
+                     ticker = text_row[0]
+                     if ticker.isupper() and 3 <= len(ticker) <= 5:
+                         holdings.append({
+                             "ticker": ticker,
+                             "details": text_row
+                         })
+            
+            # Fallback: finding divs if not a table
+            if not holdings:
+                 # Look for common stock codes in text
+                 import re
+                 text = soup.get_text()
+                 candidates = re.findall(r'\b[A-Z]{3,5}\b', text)
+                 # Filter common words
+                 ignore = {'ASX', 'ETF', 'BUY', 'SELL', 'AUD', 'USD', 'NAV'}
+                 holdings = [{"ticker": c} for c in set(candidates) if c not in ignore]
+
+            return {
+                "raw_text": "Parsed", 
+                "holdings": holdings,
+                "message": f"Found {len(holdings)} positions"
+            }
 
         except Exception as e:
             logger.error(f"Scraping error: {str(e)}")
