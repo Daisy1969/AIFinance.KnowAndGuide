@@ -27,15 +27,49 @@ class SuperheroSecureConnector:
             options.add_argument("--disable-dev-shm-usage")
             options.add_argument("--window-size=1920,1080")
             
-            # Use webdriver_manager to get the driver (or system driver)
-            # In Docker, we installed chromium-driver, so we might need to point to it
-            # or ChromeDriverManager might find it if configured correctly.
-            # Using default for now, hoping webdriver_manager handles it.
+            # Robust Driver Finding Logic
+            import shutil
+            import os
             
-            # For Docker (Alpine/Debian), we often need:
-            options.binary_location = "/usr/bin/chromium"
-            service = Service("/usr/bin/chromedriver")
-
+            # Common paths for chromium-driver in Docker/Linux
+            possible_driver_paths = [
+                "/usr/bin/chromedriver",
+                "/usr/local/bin/chromedriver",
+                "/usr/lib/chromium-browser/chromedriver",
+                "/usr/bin/chromium-driver",
+                shutil.which("chromedriver"),
+                shutil.which("chromium-driver")
+            ]
+            
+            driver_path = None
+            for p in possible_driver_paths:
+                if p and os.path.exists(p):
+                    driver_path = p
+                    break
+            
+            # Common paths for Chromium binary
+            possible_bin_paths = [
+                 "/usr/bin/chromium",
+                 "/usr/bin/chromium-browser",
+                 "/usr/lib/chromium/chrome",
+                 shutil.which("chromium"),
+                 shutil.which("chromium-browser")
+            ]
+            
+            bin_path = None
+            for p in possible_bin_paths:
+                 if p and os.path.exists(p):
+                     bin_path = p
+                     break
+            
+            logger.info(f"Selected Driver: {driver_path}, Binary: {bin_path}")
+            
+            if bin_path:
+                options.binary_location = bin_path
+            
+            service = Service(driver_path) if driver_path else None
+            # If service is None, Selenium will try to find it on PATH
+            
             self.driver = webdriver.Chrome(service=service, options=options)
             
             logger.info("Opening Superhero login page...")
