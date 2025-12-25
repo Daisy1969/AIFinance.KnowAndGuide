@@ -3,6 +3,7 @@ from flask_cors import CORS
 from finance_engine.market_data import MarketData
 from finance_engine.portfolio_optimizer import PortfolioOptimizer
 from finance_engine.strategy_builder import StrategyBuilder
+from superhero_secure import SuperheroSecureConnector
 import logging
 
 app = Flask(__name__)
@@ -15,10 +16,56 @@ logger = logging.getLogger(__name__)
 market_engine = MarketData()
 optimizer_engine = PortfolioOptimizer()
 strategy_engine = StrategyBuilder()
+superhero_connector = SuperheroSecureConnector()
 
 @app.route('/')
 def home():
     return jsonify({"message": "KnowAndGuide Financial Engine Active", "status": "running"})
+
+# ... (Existing recommend endpoint) ...
+
+@app.route('/api/connect-superhero', methods=['POST'])
+def connect_superhero():
+    try:
+        # Check if already running
+        if superhero_connector.driver:
+            return jsonify({"message": "Session already active", "status": "active"})
+        
+        data = request.json or {}
+        username = data.get('username')
+        password = data.get('password')
+        
+        success, msg = superhero_connector.start_login_session(username, password)
+        if success:
+            return jsonify({"message": msg, "status": "waiting_for_login"})
+        else:
+            return jsonify({"error": msg}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/superhero-status', methods=['GET'])
+def superhero_status():
+    try:
+        is_logged_in, msg = superhero_connector.check_login_status()
+        
+        if is_logged_in:
+            # If logged in, we can try to scrape immediately or wait for separate call
+            # For now, let's return status so Frontend can show "Success! Fetching data..."
+            return jsonify({"logged_in": True, "message": msg})
+        else:
+            return jsonify({"logged_in": False, "message": msg})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/superhero-holdings', methods=['GET'])
+def superhero_holdings():
+    try:
+        data = superhero_connector.get_portfolio_holdings()
+        if "error" in data:
+            return jsonify(data), 400
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/recommend', methods=['POST'])
 def recommend_portfolio():
@@ -93,15 +140,17 @@ def upload_portfolio():
             header = rows[header_row_idx]
             data_rows = rows[header_row_idx+1:]
             
+            # Identify columns
+            try:
+                sec_idx = header.index("Security")
+                units_idx = header.index("Units")
+            except ValueError:
+                 return jsonify({"error": "CSV must contain 'Security' and 'Units' columns"}), 400
+            
             portfolio_data = []
             for row in data_rows:
                 if len(row) < 3: continue 
-                # Basic mapping (Security, Units)
-                # Ensure we handle columns correctly based on header
                 try:
-                    sec_idx = header.index("Security")
-                    units_idx = header.index("Units")
-                    
                     holding = {
                         "ticker": row[sec_idx],
                         "units": row[units_idx]

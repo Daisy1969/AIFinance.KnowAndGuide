@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { Link, Loader, CheckCircle, AlertCircle } from 'lucide-react';
 
 type UserProfile = {
     age: number;
@@ -18,11 +19,90 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
     });
     const [loading, setLoading] = useState(false);
 
+    // Superhero Connection State
+    const [connectionStatus, setConnectionStatus] = useState<'idle' | 'input' | 'connecting' | 'waiting_for_login' | 'connected' | 'error'>('idle');
+    const [connectionMessage, setConnectionMessage] = useState('');
+    const [creds, setCreds] = useState({ username: '', password: '' });
+    const pollInterval = useRef<NodeJS.Timeout | null>(null);
+
+    const startConnection = () => {
+        setConnectionStatus('input');
+        setConnectionMessage('');
+    };
+
+    const submitCredentials = async () => {
+        setConnectionStatus('connecting');
+        setConnectionMessage('Starting secure secure session...');
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/connect-superhero`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(creds)
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                setConnectionStatus('waiting_for_login');
+                setConnectionMessage('Session started. secure login in progress...');
+                // Start polling
+                pollInterval.current = setInterval(checkLoginStatus, 2000);
+            } else {
+                setConnectionStatus('error');
+                setConnectionMessage(data.error || 'Failed to start session');
+            }
+        } catch (error) {
+            setConnectionStatus('error');
+            setConnectionMessage('Connection failed. Backend may be offline.');
+        }
+    };
+
+    const checkLoginStatus = async () => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/superhero-status`);
+            const data = await res.json();
+
+            if (data.logged_in) {
+                if (pollInterval.current) clearInterval(pollInterval.current);
+                setConnectionStatus('connected');
+                setConnectionMessage('Successfully logged in! Fetching holdings...');
+                fetchHoldings();
+            } else {
+                if (data.message && data.message.includes("MFA")) {
+                    setConnectionMessage("MFA Required. (Auto-MFA not yet implemented, please retry without MFA or check logs)");
+                } else {
+                    setConnectionMessage(data.message || 'Logging in...');
+                }
+            }
+        } catch (error) {
+            console.error("Polling error", error);
+        }
+    };
+
+    const fetchHoldings = async () => {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/superhero-holdings`);
+            const data = await res.json();
+
+            if (res.ok && data.raw_text) {
+                // In a real scenario, we'd parse specific tickers. 
+                // For now, we'll confirm specific known tickers if found in the text
+                // or just notify success.
+                // This is a placeholder for the parsing logic response
+                setConnectionMessage('Holdings synced from Superhero!');
+
+                // Optional: Update assets based on findings (mock logic for now as scraper is generic)
+                // setProfile(p => ({ ...p, assets: [...p.assets, 'NEWLY_FOUND_TICKER'] }));
+            }
+        } catch (error) {
+            setConnectionMessage('Failed to fetch holdings after login.');
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await fetch('/api/recommend', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/recommend`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(profile),
@@ -42,6 +122,74 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
                 <span className="w-2 h-6 bg-blue-500 rounded-full"></span>
                 Investor Profile
             </h2>
+
+            {/* Superhero Connection Section */}
+            <div className="mb-6 p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-semibold text-slate-300">Connect Portfolio</h3>
+                    <span className="text-xs text-slate-500">Secure Browser Agent</span>
+                </div>
+
+                {connectionStatus === 'connected' ? (
+                    <div className="flex items-center gap-2 text-green-400 p-2 bg-green-900/20 rounded">
+                        <CheckCircle size={18} />
+                        <span className="text-sm font-medium">Superhero Connected</span>
+                    </div>
+                ) : connectionStatus === 'input' ? (
+                    <div className="space-y-3">
+                        <input
+                            type="text"
+                            placeholder="Email"
+                            className="w-full bg-slate-800 border-slate-600 rounded p-2 text-sm text-white"
+                            value={creds.username}
+                            onChange={e => setCreds({ ...creds, username: e.target.value })}
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            className="w-full bg-slate-800 border-slate-600 rounded p-2 text-sm text-white"
+                            value={creds.password}
+                            onChange={e => setCreds({ ...creds, password: e.target.value })}
+                        />
+                        <div className="flex gap-2">
+                            <button onClick={submitCredentials} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs py-2 rounded">
+                                Login
+                            </button>
+                            <button onClick={() => setConnectionStatus('idle')} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white text-xs py-2 rounded">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <button
+                        type="button"
+                        onClick={startConnection}
+                        disabled={connectionStatus === 'connecting' || connectionStatus === 'waiting_for_login'}
+                        className="w-full flex items-center justify-center gap-2 bg-[#2C2C54] hover:bg-[#3D3D75] text-white py-2 px-4 rounded transition-colors border border-slate-600 disabled:opacity-50"
+                    >
+                        {connectionStatus === 'waiting_for_login' || connectionStatus === 'connecting' ? (
+                            <Loader className="animate-spin" size={16} />
+                        ) : (
+                            <Link size={16} />
+                        )}
+                        {connectionStatus === 'waiting_for_login' ? 'Logging in...' : connectionStatus === 'connecting' ? 'Starting...' : 'Connect Superhero Account'}
+                    </button>
+                )}
+
+                {/* Status Messages */}
+                {connectionMessage && (
+                    <div className={`mt-2 text-xs flex items-center gap-1.5 ${connectionStatus === 'error' ? 'text-red-400' :
+                            connectionStatus === 'connected' ? 'text-green-400' : 'text-blue-400'
+                        }`}>
+                        {(connectionStatus === 'waiting_for_login' || connectionStatus === 'connecting') && <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                        </span>}
+                        {connectionMessage}
+                    </div>
+                )}
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                     <label className="block text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">Age</label>
