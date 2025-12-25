@@ -168,5 +168,34 @@ def upload_portfolio():
         except Exception as e:
             return jsonify({"error": f"Failed to parse CSV: {str(e)}"}), 500
 
+@app.route('/api/debug-selenium', methods=['GET'])
+def debug_selenium():
+    try:
+        from selenium import webdriver
+        from selenium.webdriver.chrome.service import Service
+        from selenium.webdriver.chrome.options import Options
+        import shutil
+
+        # Check paths
+        chromium_path = shutil.which("chromium") or "/usr/bin/chromium"
+        driver_path = shutil.which("chromedriver") or "/usr/bin/chromedriver" or shutil.which("chromium-driver")
+        
+        path_info = f"Chromium: {chromium_path}, Driver: {driver_path}"
+
+        options = Options()
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.binary_location = chromium_path
+        
+        service = Service(driver_path) if driver_path else None
+        
+        driver = webdriver.Chrome(service=service, options=options)
+        driver.quit()
+        
+        return jsonify({"status": "success", "message": "Browser launched successfully", "paths": path_info}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e), "paths": path_info if 'path_info' in locals() else "Unknown"}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
