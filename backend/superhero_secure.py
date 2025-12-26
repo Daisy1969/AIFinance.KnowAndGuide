@@ -7,6 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 
 logging.basicConfig(level=logging.INFO)
@@ -99,11 +100,22 @@ class SuperheroSecureConnector:
             pass_field = self.driver.find_element(By.NAME, "password")
             pass_field.clear()
             pass_field.send_keys(password)
+            time.sleep(1) # Wait for React state
             
-            # Submit
-            logger.info("Clicking login...")
-            login_btn = self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
-            login_btn.click()
+            # Submit: Try Enter Key first (Most robust)
+            logger.info("Sending ENTER key...")
+            pass_field.send_keys(Keys.RETURN)
+            time.sleep(2)
+            
+            # Submit: Try Button Click if still on page
+            if "log-in" in self.driver.current_url:
+                 logger.info("Clicking login button (Secondary)...")
+                 try:
+                     login_btn = self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
+                     # JS Click to bypass potential obstruction/disabled state quirks
+                     self.driver.execute_script("arguments[0].click();", login_btn)
+                 except Exception as e:
+                     logger.warning(f"Button click fallback failed: {e}")
             
             # Wait for success or MFA
             # Check for URL change or MFA field
