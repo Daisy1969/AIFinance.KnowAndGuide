@@ -194,6 +194,20 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
                         {connectionMessage}
                     </div>
                 )}
+
+                {/* Debug Info Toggle */}
+                <div className="mt-3 pt-3 border-t border-slate-800">
+                    <details className="group">
+                        <summary className="text-[10px] text-slate-500 cursor-pointer hover:text-slate-300 list-none flex items-center gap-1">
+                            <span>▶</span> Debug Info
+                        </summary>
+                        <div className="mt-2 text-[10px] font-mono text-slate-400 bg-black/40 p-2 rounded overflow-x-auto">
+                            <p>Status: {connectionStatus}</p>
+                            <p>Last Message: {connectionMessage}</p>
+                            <p>API: {process.env.NEXT_PUBLIC_API_URL || 'Auto'}</p>
+                        </div>
+                    </details>
+                </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
