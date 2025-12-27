@@ -18,6 +18,8 @@ optimizer_engine = PortfolioOptimizer()
 strategy_engine = StrategyBuilder()
 superhero_connector = SuperheroSecureConnector()
 
+logger.info("Application Startup Complete. Version: Debug-Patch-2")
+
 @app.route('/')
 def home():
     return jsonify({"message": "KnowAndGuide Financial Engine Active", "status": "running"})
