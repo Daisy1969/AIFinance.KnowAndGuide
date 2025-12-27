@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from bs4 import BeautifulSoup
+from selenium.webdriver.common.keys import Keys
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -175,6 +175,7 @@ class SuperheroSecureConnector:
             
             # Get full page source
             page_source = self.driver.page_source
+            from bs4 import BeautifulSoup
             soup = BeautifulSoup(page_source, 'html.parser')
             
             holdings = []
