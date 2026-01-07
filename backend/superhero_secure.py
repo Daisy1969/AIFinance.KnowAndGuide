@@ -26,8 +26,8 @@ class SuperheroSecureConnector:
             options = Options()
             options.add_argument("--headless") # Must be headless in Docker
             options.add_argument("--no-sandbox")
-            options.add_argument("--disable-dev-shm-usage")
-            options.add_argument("--window-size=1920,1080")
+            options.add_argument("--disable-blink-features=AutomationControlled")
+            options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
             
             # Robust Driver Finding Logic
             import shutil
@@ -107,6 +107,33 @@ class SuperheroSecureConnector:
             pass_field.send_keys(Keys.RETURN)
             time.sleep(2)
             
+            # CAPTCHA / Cloudflare Check
+            # Check for generic iframe that looks like a challenge
+            try:
+                iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
+                for iframe in iframes:
+                    title = iframe.get_attribute("title")
+                    if title and ("cloudflare" in title.lower() or "challenge" in title.lower() or "recaptcha" in title.lower()):
+                         logger.info(f"Found Security Challenge Iframe: {title}. Attempting to click...")
+                         self.driver.switch_to.frame(iframe)
+                         # Try searching for a checkbox or body click
+                         try:
+                             # Cloudflare often just needs a click on the body or a specific checkbox
+                             checkbox = self.driver.find_element(By.CSS_SELECTOR, "input[type='checkbox']")
+                             if checkbox:
+                                 checkbox.click()
+                             else:
+                                 # Fallback: Just click the body of the iframe
+                                 self.driver.find_element(By.TAG_NAME, "body").click()
+                             
+                             logger.info("Clicked Challenge Checkbox.")
+                             time.sleep(2)
+                         except:
+                             pass
+                         self.driver.switch_to.default_content()
+            except Exception as captcha_err:
+                logger.warning(f"CAPTCHA Check failed (ignoring): {captcha_err}")
+
             # Submit: Try Button Click if still on page
             if "log-in" in self.driver.current_url:
                  logger.info("Clicking login button (Secondary)...")
