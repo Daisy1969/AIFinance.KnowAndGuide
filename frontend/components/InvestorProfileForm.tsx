@@ -215,7 +215,14 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
                             <p>Status: {connectionStatus}</p>
                             <p>Last Message: {connectionMessage}</p>
                             <p>API: {process.env.NEXT_PUBLIC_API_URL || 'Auto'}</p>
-                        </div>
+                            <div className="mt-2 border-t border-slate-700 pt-2">
+                                <p className="mb-1 text-[10px] text-slate-500">Live Browser View:</p>
+                                <img
+                                    src={`${process.env.NEXT_PUBLIC_API_URL || 'https://aifinance-backendbackend.onrender.com'}/api/debug-screenshot?t=${Date.now()}`}
+                                    alt="Backend Browser State"
+                                    className="w-full rounded border border-slate-700 opacity-80 hover:opacity-100 transition-opacity"
+                                />
+                            </div>
                     </details>
                 </div>
             </div>
