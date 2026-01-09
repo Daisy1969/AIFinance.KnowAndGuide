@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from 'react';
-import { Link, Loader, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Link, Loader, CheckCircle, AlertCircle } from 'lucide-react';
 
 type UserProfile = {
     age: number;
@@ -162,9 +162,9 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 hover:text-white uppercase font-bold tracking-wider"
                             >
-                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                {showPassword ? 'HIDE' : 'SHOW'}
                             </button>
                         </div>
                         <div className="flex gap-2">

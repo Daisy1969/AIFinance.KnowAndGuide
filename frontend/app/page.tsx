@@ -15,7 +15,7 @@ export default function Home() {
                     System Status: <span className="text-emerald-500">Active</span>
                 </div>
                 <div className="text-sm font-mono text-slate-500">
-                    v1.2.1 AGENTIC
+                    v1.2.2 AGENTIC
                 </div>
             </div>
 
