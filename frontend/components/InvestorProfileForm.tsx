@@ -234,6 +234,7 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
                                     className="w-full rounded border border-slate-700 opacity-80 hover:opacity-100 transition-opacity"
                                 />
                             </div>
+                        </div>
                     </details>
                 </div>
             </div>
