@@ -10,7 +10,18 @@ type UserProfile = {
     assets: string[];
     currency: 'AUD' | 'USD';
 };
-
+const getApiUrl = () => {
+    // @ts-ignore
+    if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) {
+        // @ts-ignore
+        return process.env.NEXT_PUBLIC_API_URL;
+    }
+    // @ts-ignore
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') {
+        return 'https://aifinance-backendbackend.onrender.com';
+    }
+    return 'http://localhost:5001';
+};
 export default function InvestorProfileForm({ onComplete }: { onComplete: (data: any) => void }) {
     const [profile, setProfile] = useState<UserProfile>({
         age: 30,
@@ -214,11 +225,11 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
                         <div className="mt-2 text-[10px] font-mono text-slate-400 bg-black/40 p-2 rounded overflow-x-auto">
                             <p>Status: {connectionStatus}</p>
                             <p>Last Message: {connectionMessage}</p>
-                            <p>API: {process.env.NEXT_PUBLIC_API_URL || 'Auto'}</p>
+                            <p>API: {getApiUrl()}</p>
                             <div className="mt-2 border-t border-slate-700 pt-2">
                                 <p className="mb-1 text-[10px] text-slate-500">Live Browser View:</p>
                                 <img
-                                    src={`${process.env.NEXT_PUBLIC_API_URL || 'https://aifinance-backendbackend.onrender.com'}/api/debug-screenshot?t=${Date.now()}`}
+                                    src={`${getApiUrl()}/api/debug-screenshot?t=${Date.now()}`}
                                     alt="Backend Browser State"
                                     className="w-full rounded border border-slate-700 opacity-80 hover:opacity-100 transition-opacity"
                                 />
