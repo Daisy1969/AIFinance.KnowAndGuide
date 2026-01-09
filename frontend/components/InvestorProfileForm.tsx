@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, Loader, CheckCircle, AlertCircle } from 'lucide-react';
 
 type UserProfile = {
@@ -48,7 +48,7 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
         setConnectionStatus('connecting');
         setConnectionMessage('Starting secure session...');
         try {
-            const API_BASE = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://aifinance-backendbackend.onrender.com' : 'http://localhost:5001');
+            const API_BASE = getApiUrl();
             const res = await fetch(`${API_BASE}/api/connect-superhero`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -73,7 +73,7 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
 
     const checkLoginStatus = async () => {
         try {
-            const API_BASE = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://aifinance-backendbackend.onrender.com' : 'http://localhost:5001');
+            const API_BASE = getApiUrl();
             const res = await fetch(`${API_BASE}/api/superhero-status`);
             const data = await res.json();
 
@@ -96,7 +96,7 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
 
     const fetchHoldings = async () => {
         try {
-            const API_BASE = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://aifinance-backendbackend.onrender.com' : 'http://localhost:5001');
+            const API_BASE = getApiUrl();
             const res = await fetch(`${API_BASE}/api/superhero-holdings`);
             const data = await res.json();
 
@@ -119,7 +119,7 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
         e.preventDefault();
         setLoading(true);
         try {
-            const API_BASE = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://aifinance-backendbackend.onrender.com' : 'http://localhost:5001');
+            const API_BASE = getApiUrl();
             const res = await fetch(`${API_BASE}/api/recommend`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
