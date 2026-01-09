@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from 'react';
-import { Link, Loader, CheckCircle, AlertCircle } from 'lucide-react';
+import { Link, Loader, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 type UserProfile = {
     age: number;
@@ -25,6 +25,7 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
     const [connectionStatus, setConnectionStatus] = useState<'idle' | 'input' | 'connecting' | 'waiting_for_login' | 'connected' | 'error'>('idle');
     const [connectionMessage, setConnectionMessage] = useState('');
     const [creds, setCreds] = useState({ username: '', password: '' });
+    const [showPassword, setShowPassword] = useState(false);
     const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
     const startConnection = () => {
@@ -150,13 +151,22 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
                             value={creds.username}
                             onChange={e => setCreds({ ...creds, username: e.target.value })}
                         />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            className="w-full bg-slate-800 border-slate-600 rounded p-2 text-sm text-white"
-                            value={creds.password}
-                            onChange={e => setCreds({ ...creds, password: e.target.value })}
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Password"
+                                className="w-full bg-slate-800 border-slate-600 rounded p-2 text-sm text-white pr-10"
+                                value={creds.password}
+                                onChange={e => setCreds({ ...creds, password: e.target.value })}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                            >
+                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
                         <div className="flex gap-2">
                             <button onClick={submitCredentials} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs py-2 rounded">
                                 Login
