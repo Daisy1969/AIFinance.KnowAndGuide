@@ -14,8 +14,8 @@ export default function Home() {
                 <div className="text-sm font-mono text-slate-400 border border-slate-800 px-3 py-1 rounded-full bg-slate-800/50">
                     System Status: <span className="text-emerald-500">Active</span>
                 </div>
-                <div className="text-sm font-mono text-slate-500">
-                    v1.2.2 AGENTIC
+                <div className="text-slate-500 font-mono text-xs">
+                    v1.2.5 AGENTIC
                 </div>
             </div>
 
