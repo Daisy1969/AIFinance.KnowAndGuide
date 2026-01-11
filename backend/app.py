@@ -22,7 +22,7 @@ logger.info("Application Startup Complete. Version: Debug-Patch-2")
 
 @app.route('/')
 def home():
-    return jsonify({"message": "KnowAndGuide Financial Engine Active", "status": "running", "version": "1.2.3 - FORCE UPDATE"})
+    return jsonify({"message": "KnowAndGuide Financial Engine Active", "status": "running", "version": "1.2.4 - WAKE UP RENDER"})
 
 # ... (Existing recommend endpoint) ...
 

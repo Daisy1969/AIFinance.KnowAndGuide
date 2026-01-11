@@ -14,4 +14,5 @@ requests
 selenium
 webdriver-manager
 python-dotenv
-# Force Rebuild Trigger: v1.2.3 - Nuclear Option
+gunicorn
+# Force Rebuild Trigger: v1.2.4 - WAKE UP RENDER
