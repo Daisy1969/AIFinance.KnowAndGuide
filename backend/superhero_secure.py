@@ -135,14 +135,17 @@ class SuperheroSecureConnector:
                 logger.warning(f"CAPTCHA Check failed (ignoring): {captcha_err}")
 
             # Submit: Try Button Click if still on page
+            # Submit: Try Button Click forcefully (JS Click)
             if "log-in" in self.driver.current_url:
-                 logger.info("Clicking login button (Secondary)...")
+                 logger.info("Attemping JS Click on login button...")
                  try:
-                     login_btn = self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
-                     # JS Click to bypass potential obstruction/disabled state quirks
+                     # Wait for button to be present
+                     login_btn = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[type='submit']")))
+                     # JS Click is strictly required if element is 'obscured' or 'not interactable'
                      self.driver.execute_script("arguments[0].click();", login_btn)
+                     time.sleep(2)
                  except Exception as e:
-                     logger.warning(f"Button click fallback failed: {e}")
+                     logger.warning(f"Button JS click failed: {e}")
             
             # Wait for success or MFA
             # Check for URL change or MFA field
