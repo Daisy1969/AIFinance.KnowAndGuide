@@ -5,6 +5,8 @@ from finance_engine.portfolio_optimizer import PortfolioOptimizer
 from finance_engine.strategy_builder import StrategyBuilder
 from superhero_secure import SuperheroSecureConnector
 import logging
+import sys
+import datetime
 
 app = Flask(__name__)
 CORS(app) # Enable CORS
@@ -22,7 +24,16 @@ logger.info("Application Startup Complete. Version: Debug-Patch-2")
 
 @app.route('/')
 def home():
-    return jsonify({"message": "KnowAndGuide Financial Engine Active", "status": "running", "version": "1.2.4 - WAKE UP RENDER"})
+    debug_info = {
+        "message": "KnowAndGuide Financial Engine Active",
+        "status": "running",
+        "version": "1.2.5 - PROCFILE UPDATE",
+        "server_time": datetime.datetime.now().isoformat(),
+        "python_version": sys.version,
+        "superhero_driver_active": bool(superhero_connector.driver),
+        "selenium_status": "Ready" if superhero_connector.driver else "Idle"
+    }
+    return jsonify(debug_info)
 
 # ... (Existing recommend endpoint) ...
 
