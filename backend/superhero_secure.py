@@ -247,6 +247,35 @@ class SuperheroSecureConnector:
             logger.error(f"Scraping error: {str(e)}")
             return {"error": f"Scraping failed: {str(e)}"}
 
+    def click_at_ratio(self, x_ratio, y_ratio):
+        """
+        Performs a click at a specific location on the screen, defined by ratios (0.0 - 1.0).
+        This allows the frontend to send clicks regardless of its display size, mapping to the backend's 1280x800 resolution.
+        """
+        if not self.driver:
+            return False, "No active browser session"
+            
+        try:
+            from selenium.webdriver.common.action_chains import ActionChains
+            
+            # Backend resolution is fixed at 1280x800
+            SERVER_WIDTH = 1280
+            SERVER_HEIGHT = 800
+            
+            target_x = int(x_ratio * SERVER_WIDTH)
+            target_y = int(y_ratio * SERVER_HEIGHT)
+            
+            logger.info(f"Parametric Click: Ratio({x_ratio:.2f}, {y_ratio:.2f}) -> Pixels({target_x}, {target_y})")
+            
+            actions = ActionChains(self.driver)
+            actions.move_to_element_with_offset(self.driver.find_element(By.TAG_NAME, "body"), 0, 0) # Reset to top-left
+            actions.move_by_offset(target_x, target_y).click().perform()
+            
+            return True, f"Clicked at {target_x}, {target_y}"
+        except Exception as e:
+            logger.warning(f"Click Interaction Failed: {e}")
+            return False, str(e)
+
     def close(self):
         if self.driver:
             self.driver.quit()

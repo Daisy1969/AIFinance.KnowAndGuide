@@ -283,5 +283,29 @@ def debug_screenshot():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/debug-interact', methods=['POST'])
+def debug_interact():
+    try:
+        if not superhero_connector.driver:
+             return jsonify({"error": "No active driver"}), 404
+             
+        data = request.json
+        x = data.get('x') # 0.0 - 1.0
+        y = data.get('y') # 0.0 - 1.0
+        
+        if x is None or y is None:
+            return jsonify({"error": "Missing coordinates"}), 400
+            
+        success, msg = superhero_connector.click_at_ratio(float(x), float(y))
+        
+        # Force fresh screenshot on next poll
+        import os
+        if os.path.exists("/tmp/screenshot.png"):
+            os.remove("/tmp/screenshot.png")
+            
+        return jsonify({"success": success, "message": msg})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

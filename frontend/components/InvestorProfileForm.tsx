@@ -226,12 +226,31 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
                             <p>Status: {connectionStatus}</p>
                             <p>Last Message: {connectionMessage}</p>
                             <p>API: {getApiUrl()}</p>
-                            <div className="mt-2 border-t border-slate-700 pt-2">
-                                <p className="mb-1 text-[10px] text-slate-500">Live Browser View:</p>
+                            <div className="mt-2 border-t border-slate-700 pt-2 relative">
+                                <p className="mb-1 text-[10px] text-slate-500">Live Browser View (Click to Interact):</p>
                                 <img
                                     src={`${getApiUrl()}/api/debug-screenshot?t=${Date.now()}`}
                                     alt="Backend Browser State"
-                                    className="w-full rounded border border-slate-700 opacity-80 hover:opacity-100 transition-opacity"
+                                    className="w-full rounded border border-slate-700 opacity-80 hover:opacity-100 transition-opacity cursor-crosshair"
+                                    onClick={async (e) => {
+                                        // Calculate relative coordinates
+                                        const img = e.currentTarget;
+                                        const rect = img.getBoundingClientRect();
+                                        const x = (e.clientX - rect.left) / rect.width;
+                                        const y = (e.clientY - rect.top) / rect.height;
+
+                                        // Send to backend
+                                        try {
+                                            await fetch(`${getApiUrl()}/api/debug-interact`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ x, y })
+                                            });
+                                            setConnectionMessage(`Click sent: ${x.toFixed(2)}, ${y.toFixed(2)}`);
+                                        } catch (err) {
+                                            console.error("Interaction failed", err);
+                                        }
+                                    }}
                                 />
                             </div>
                         </div>
