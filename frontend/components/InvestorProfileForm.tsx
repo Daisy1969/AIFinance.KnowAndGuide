@@ -59,8 +59,8 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
             if (res.ok) {
                 setConnectionStatus('waiting_for_login');
                 setConnectionMessage('Session started. secure login in progress...');
-                // Start polling
-                pollInterval.current = setInterval(checkLoginStatus, 2000);
+                // Start polling (Interval increased to 5s to prevent server overload)
+                pollInterval.current = setInterval(checkLoginStatus, 5000);
             } else {
                 setConnectionStatus('error');
                 setConnectionMessage(data.error || 'Failed to start session');

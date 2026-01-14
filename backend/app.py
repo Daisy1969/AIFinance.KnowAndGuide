@@ -269,6 +269,15 @@ def debug_screenshot():
             return jsonify({"error": "No active driver"}), 404
         
         path = "/tmp/screenshot.png"
+        
+        # Throttling: Check if file exists and is less than 3 seconds old
+        import os
+        import time
+        if os.path.exists(path):
+             mtime = os.path.getmtime(path)
+             if time.time() - mtime < 3:
+                 return send_file(path, mimetype='image/png')
+
         superhero_connector.driver.save_screenshot(path)
         return send_file(path, mimetype='image/png')
     except Exception as e:
