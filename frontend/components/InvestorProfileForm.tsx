@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { Link, Loader, CheckCircle, AlertCircle } from 'lucide-react';
+import { Link, Loader, CheckCircle, AlertCircle, Maximize2, X } from 'lucide-react';
 
 type UserProfile = {
     age: number;
@@ -37,7 +37,28 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
     const [connectionMessage, setConnectionMessage] = useState('');
     const [creds, setCreds] = useState({ username: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
+    const [isFullScreen, setIsFullScreen] = useState(false);
     const pollInterval = useRef<NodeJS.Timeout | null>(null);
+
+    const handleImageClick = async (e: React.MouseEvent<HTMLImageElement>) => {
+        // Calculate relative coordinates
+        const img = e.currentTarget;
+        const rect = img.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+
+        // Send to backend
+        try {
+            await fetch(`${getApiUrl()}/api/debug-interact`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ x, y })
+            });
+            setConnectionMessage(`Click sent: ${x.toFixed(2)}, ${y.toFixed(2)}`);
+        } catch (err) {
+            console.error("Interaction failed", err);
+        }
+    };
 
     const startConnection = () => {
         setConnectionStatus('input');
