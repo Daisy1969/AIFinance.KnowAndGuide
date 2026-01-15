@@ -248,7 +248,16 @@ export default function InvestorProfileForm({ onComplete }: { onComplete: (data:
                             <p>Last Message: {connectionMessage}</p>
                             <p>API: {getApiUrl()}</p>
                             <div className="mt-2 border-t border-slate-700 pt-2 relative">
-                                <p className="mb-1 text-[10px] text-slate-500">Live Browser View (Click to Interact):</p>
+                                <div className="flex justify-between items-center mb-1">
+                                    <p className="text-[10px] text-slate-500">Live Browser View (Click to Interact):</p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsFullScreen(true)}
+                                        className="text-blue-400 hover:text-blue-300 flex items-center gap-1 text-[10px]"
+                                    >
+                                        <Maximize2 size={10} /> Enlarge
+                                    </button>
+                                </div>
                                 <img
                                     src={`${getApiUrl()}/api/debug-screenshot?t=${Date.now()}`}
                                     alt="Backend Browser State"
